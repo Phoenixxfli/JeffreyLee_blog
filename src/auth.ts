@@ -53,7 +53,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "database" },
   trustHost: true,
-  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || (process.env.NODE_ENV === "production" ? undefined : "dev-secret"),
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "dev-secret",
   pages: {
     signIn: "/auth/signin"
   },

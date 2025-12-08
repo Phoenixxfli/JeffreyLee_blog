@@ -1,16 +1,47 @@
-import { signIn } from "@/auth";
-import { redirect } from "next/navigation";
+"use client";
+
+import { signIn } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
 
-export const metadata = {
-  title: "登录 | JeffreyLee Blog"
-};
+export default function SignInPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState(false);
 
-export default function SignInPage({
-  searchParams
-}: {
-  searchParams: { error?: string; callbackUrl?: string };
-}) {
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+    const username = formData.get("username") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      const result = await signIn("credentials", {
+        username,
+        password,
+        redirect: false
+      });
+
+      if (result?.error) {
+        setError("用户名或密码错误");
+        setLoading(false);
+      } else if (result?.ok) {
+        router.push(callbackUrl);
+        router.refresh();
+      }
+    } catch (err) {
+      setError("登录失败，请稍后重试");
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-md space-y-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-900/70 p-6 shadow-sm">
       <div className="space-y-2">
@@ -20,32 +51,13 @@ export default function SignInPage({
         </p>
       </div>
 
-      {searchParams.error && (
+      {error && (
         <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-          {searchParams.error === "CredentialsSignin" && "用户名或密码错误"}
-          {searchParams.error !== "CredentialsSignin" && searchParams.error}
+          {error}
         </div>
       )}
 
-      <form
-        action={async (formData) => {
-          "use server";
-          const username = formData.get("username") as string;
-          const password = formData.get("password") as string;
-          const callbackUrl = searchParams.callbackUrl || "/";
-
-          try {
-            await signIn("credentials", {
-              username,
-              password,
-              redirectTo: callbackUrl
-            });
-          } catch (error) {
-            redirect(`/auth/signin?error=CredentialsSignin&callbackUrl=${callbackUrl}`);
-          }
-        }}
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">用户名或邮箱</label>
           <input
@@ -68,9 +80,10 @@ export default function SignInPage({
         </div>
         <button
           type="submit"
-          className="w-full rounded-lg bg-brand px-4 py-2 text-white hover:bg-brand/90"
+          disabled={loading}
+          className="w-full rounded-lg bg-brand px-4 py-2 text-white hover:bg-brand/90 disabled:opacity-60"
         >
-          登录
+          {loading ? "登录中..." : "登录"}
         </button>
       </form>
 
