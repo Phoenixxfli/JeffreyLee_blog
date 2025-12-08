@@ -112,19 +112,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       if (session.user && token) {
-        if (token.id) {
+        if (token.id && typeof token.id === "string") {
           session.user.id = token.id;
         }
-        if (token.email) {
+        if (token.email && typeof token.email === "string") {
           session.user.email = token.email;
         }
-        if (token.name) {
+        if (token.name && typeof token.name === "string") {
           session.user.name = token.name;
         }
-        if (token.image) {
+        if (token.image && typeof token.image === "string") {
           session.user.image = token.image;
         }
-        session.user.isAdmin = token.isAdmin ?? false;
+        session.user.isAdmin = (token.isAdmin as boolean) ?? false;
       }
       return session;
     }
