@@ -53,27 +53,47 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "database" },
   trustHost: true,
-  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "dev-secret",
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   pages: {
     signIn: "/auth/signin"
   },
   providers: [credentialsProvider],
   callbacks: {
-    session: async ({ session }) => {
-      if (session.user?.email) {
-        const email = session.user.email.toLowerCase();
-        session.user.isAdmin = adminEmails.includes(email);
-      }
-      return session;
-    },
-    signIn: async ({ user }) => {
+    async signIn({ user, account }) {
+      // Credentials Provider 登录后，更新用户角色
       if (user.email && adminEmails.includes(user.email.toLowerCase())) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { role: "admin" }
-        });
+        try {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: "admin" }
+          });
+        } catch (error) {
+          console.error("更新用户角色失败:", error);
+        }
       }
       return true;
+    },
+    async session({ session, user }) {
+      if (session.user) {
+        // 从数据库获取用户信息
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id }
+        });
+        
+        if (dbUser) {
+          session.user.id = dbUser.id;
+          session.user.name = dbUser.name || dbUser.username;
+          session.user.email = dbUser.email;
+          session.user.image = dbUser.image;
+          
+          // 检查是否为管理员
+          if (dbUser.email) {
+            const email = dbUser.email.toLowerCase();
+            session.user.isAdmin = adminEmails.includes(email) || dbUser.role === "admin";
+          }
+        }
+      }
+      return session;
     }
   }
 });
