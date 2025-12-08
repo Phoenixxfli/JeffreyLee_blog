@@ -85,10 +85,10 @@ export default async function HomePage() {
             <SidebarCard title="搜索">
               <SearchBox
                 items={posts.map((p) => ({
-                  title: p.frontmatter.title,
-                  slug: p.frontmatter.slug,
-                  summary: p.frontmatter.summary,
-                  tags: p.frontmatter.tags
+                  title: p.title,
+                  slug: p.slug,
+                  summary: p.summary ?? undefined,
+                  tags: p.tags ? p.tags.split(",").map((t) => t.trim()).filter(Boolean) : []
                 }))}
               />
             </SidebarCard>
