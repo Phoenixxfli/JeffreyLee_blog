@@ -2,6 +2,9 @@ import Link from "next/link";
 import { siteConfig } from "@/config/site";
 
 export default function Footer() {
+  // 过滤掉上传链接，只显示普通导航项
+  const navItems = siteConfig.nav.filter((item) => item.href !== "/upload");
+  
   return (
     <footer className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 mt-16">
       <div className="mx-auto max-w-6xl px-4 py-8 md:px-6">
@@ -13,7 +16,7 @@ export default function Footer() {
           <div>
             <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">导航</div>
             <div className="flex flex-wrap gap-3">
-              {siteConfig.nav.map((item) => (
+              {navItems.map((item) => (
                 <Link key={item.href} href={item.href} className="hover:text-brand">
                   {item.label}
                 </Link>
