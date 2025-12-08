@@ -93,10 +93,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               session.user.image = dbUser.image;
             }
             
-            // 检查是否为管理员
-            if (dbUser.email) {
+            // 检查是否为管理员：优先检查数据库中的 role，其次检查 ADMIN_EMAILS
+            if (dbUser.role === "admin") {
+              session.user.isAdmin = true;
+            } else if (dbUser.email) {
               const email = dbUser.email.toLowerCase();
-              session.user.isAdmin = adminEmails.includes(email) || dbUser.role === "admin";
+              session.user.isAdmin = adminEmails.includes(email);
+              // 如果邮箱在管理员列表中但数据库 role 不是 admin，更新数据库
+              if (adminEmails.includes(email) && dbUser.role !== "admin") {
+                try {
+                  await prisma.user.update({
+                    where: { id: dbUser.id },
+                    data: { role: "admin" }
+                  });
+                } catch (error) {
+                  console.error("更新用户角色失败:", error);
+                }
+              }
+            } else {
+              session.user.isAdmin = false;
             }
           }
         } catch (error) {

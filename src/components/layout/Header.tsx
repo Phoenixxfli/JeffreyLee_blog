@@ -7,7 +7,8 @@ import { auth } from "@/auth";
 export default async function Header() {
   const session = await auth();
   const isAdmin = !!session?.user?.isAdmin;
-  const navItems = siteConfig.nav.filter((item) => item.href !== "/upload" || isAdmin);
+  // 只显示普通导航项，上传按钮在 UserMenu 中显示（仅管理员可见）
+  const navItems = siteConfig.nav.filter((item) => item.href !== "/upload");
   return (
     <header className="sticky top-0 z-30 backdrop-blur bg-white/80 dark:bg-gray-950/60 border-b border-gray-200/70 dark:border-gray-800/60 shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
