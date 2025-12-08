@@ -103,15 +103,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.name = dbUser.name || dbUser.username;
             token.image = dbUser.image;
             
-            // 检查是否为管理员
-            if (dbUser.role === "admin") {
-              token.isAdmin = true;
-            } else if (dbUser.email) {
-              const email = dbUser.email.toLowerCase();
-              token.isAdmin = adminEmails.includes(email);
-            } else {
-              token.isAdmin = false;
-            }
+            // 检查是否为管理员：只检查数据库中的 role
+            // 安全：只有数据库中明确标记为 admin 的用户才是管理员
+            token.isAdmin = dbUser.role === "admin";
           }
         } catch (error) {
           console.error("获取用户信息失败:", error);
