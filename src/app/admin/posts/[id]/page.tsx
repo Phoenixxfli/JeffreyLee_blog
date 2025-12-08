@@ -14,6 +14,7 @@ export default async function EditPostPage({ params }: { params: { id: string } 
 
   async function updateAction(formData: FormData) {
     "use server";
+    const postId = params.id;
     const title = (formData.get("title") as string | null)?.trim() || "未命名";
     const slug = (formData.get("slug") as string | null)?.trim() || "";
     const date = new Date((formData.get("date") as string) || Date.now());
@@ -23,19 +24,20 @@ export default async function EditPostPage({ params }: { params: { id: string } 
     const content = (formData.get("content") as string | null) || "";
     const status = (formData.get("status") as string | null) === "draft" ? "draft" : "published";
     if (!slug) throw new Error("slug 不能为空");
-    await updatePost(post.id, { title, slug, date, tags, summary, cover, content, status });
+    await updatePost(postId, { title, slug, date, tags, summary, cover, content, status });
     revalidatePath("/");
     revalidatePath("/archive");
     revalidatePath("/tags");
     revalidatePath("/blog/[slug]");
     revalidatePath("/admin/posts");
-    revalidatePath(`/admin/posts/${post.id}`);
+    revalidatePath(`/admin/posts/${postId}`);
     redirect("/admin/posts");
   }
 
   async function deleteAction() {
     "use server";
-    await deletePost(post.id);
+    const postId = params.id;
+    await deletePost(postId);
     revalidatePath("/");
     revalidatePath("/archive");
     revalidatePath("/tags");
