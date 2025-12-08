@@ -19,6 +19,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
   messages      Message[]
+
+  @@index([username])
 }
 
 model Account {
