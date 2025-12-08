@@ -3,7 +3,12 @@ import EmailProvider from "next-auth/providers/email";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { Resend } from "resend";
-import nodemailer from "nodemailer";
+
+// 动态导入 nodemailer，避免 Edge runtime 问题
+let nodemailer: typeof import("nodemailer") | null = null;
+if (typeof window === "undefined") {
+  nodemailer = require("nodemailer");
+}
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -39,6 +44,10 @@ const provider = EmailProvider({
     }
     if (!isEmailConfigured) {
       console.warn("未配置 RESEND_API_KEY / EMAIL_SERVER，将跳过发送（仅开发占位）。");
+      return;
+    }
+    if (!nodemailer) {
+      console.warn("nodemailer 不可用，跳过发送。");
       return;
     }
     const transport = nodemailer.createTransport(emailServer);
