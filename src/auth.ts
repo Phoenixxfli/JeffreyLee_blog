@@ -83,9 +83,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           
           if (dbUser) {
             session.user.id = dbUser.id;
-            session.user.name = dbUser.name ?? dbUser.username ?? undefined;
-            session.user.email = dbUser.email ?? undefined;
-            session.user.image = dbUser.image ?? undefined;
+            if (dbUser.name || dbUser.username) {
+              session.user.name = dbUser.name ?? dbUser.username ?? null;
+            }
+            if (dbUser.email) {
+              session.user.email = dbUser.email;
+            }
+            if (dbUser.image) {
+              session.user.image = dbUser.image;
+            }
             
             // 检查是否为管理员
             if (dbUser.email) {
