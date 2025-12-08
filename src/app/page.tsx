@@ -33,7 +33,17 @@ export default async function HomePage() {
           <div className="space-y-6">
             {featured && (
               <ContentCard title="精选推荐">
-                <PostCard frontmatter={featured.frontmatter} excerpt={featured.frontmatter.summary ?? featured.excerpt ?? undefined} />
+                <PostCard
+                  frontmatter={{
+                    title: featured.title,
+                    slug: featured.slug,
+                    date: featured.date.toISOString(),
+                    tags: featured.tags ? featured.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+                    summary: featured.summary,
+                    cover: featured.cover
+                  }}
+                  excerpt={featured.summary ?? undefined}
+                />
               </ContentCard>
             )}
             <ContentCard

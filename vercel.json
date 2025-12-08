@@ -1,5 +1,5 @@
 {
-  "buildCommand": "prisma generate && (prisma migrate deploy || true) && next build",
+  "buildCommand": "prisma generate && prisma db push --skip-generate && next build",
   "installCommand": "npm install --legacy-peer-deps",
   "framework": "nextjs",
   "regions": ["hkg1"]
