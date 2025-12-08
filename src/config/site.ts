@@ -12,8 +12,7 @@ export const siteConfig = {
     { label: "归档", href: "/archive" },
     { label: "标签", href: "/tags" },
     { label: "留言", href: "/guestbook" },
-    { label: "关于", href: "/about" },
-    { label: "上传", href: "/upload" }
+    { label: "关于", href: "/about" }
   ]
 };
 
