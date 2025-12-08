@@ -35,10 +35,8 @@ export async function listPublishedByTag(tag: string) {
 
 export async function getPostBySlug(slug: string) {
   return prisma.post.findUnique({
-    where: { slug },
-    include: {
-      // content included
-    }
+    where: { slug }
+    // 默认包含所有字段，包括 content
   });
 }
 
