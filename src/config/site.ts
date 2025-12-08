@@ -1,8 +1,8 @@
 export const siteConfig = {
-  name: "Phoenix Blog",
+  name: "JeffreyLee Blog",
   description: "个人知识库与创作空间，支持图文音视频内容。",
   url: "http://localhost:3000",
-  author: "Phoenix",
+  author: "JeffreyLee",
   links: {
     github: "https://github.com",
     twitter: "https://x.com"
