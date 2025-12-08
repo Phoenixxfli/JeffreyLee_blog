@@ -14,7 +14,8 @@ export default async function EditPostPage({ params }: { params: { id: string } 
 
   async function updateAction(formData: FormData) {
     "use server";
-    const postId = params.id;
+    const postId = formData.get("id") as string;
+    if (!postId) throw new Error("文章 ID 不能为空");
     const title = (formData.get("title") as string | null)?.trim() || "未命名";
     const slug = (formData.get("slug") as string | null)?.trim() || "";
     const date = new Date((formData.get("date") as string) || Date.now());
@@ -34,9 +35,10 @@ export default async function EditPostPage({ params }: { params: { id: string } 
     redirect("/admin/posts");
   }
 
-  async function deleteAction() {
+  async function deleteAction(formData: FormData) {
     "use server";
-    const postId = params.id;
+    const postId = formData.get("id") as string;
+    if (!postId) throw new Error("文章 ID 不能为空");
     await deletePost(postId);
     revalidatePath("/");
     revalidatePath("/archive");
@@ -53,6 +55,7 @@ export default async function EditPostPage({ params }: { params: { id: string } 
         <p className="text-sm text-gray-600 dark:text-gray-400">支持 Markdown/MDX 内容。</p>
       </div>
       <form action={updateAction} className="space-y-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+        <input type="hidden" name="id" value={post.id} />
         <TextInput name="title" label="标题" required placeholder="文章标题" defaultValue={post.title} />
         <TextInput name="slug" label="Slug" required placeholder="url-friendly-slug" defaultValue={post.slug} />
         <TextInput name="date" label="日期" type="date" defaultValue={post.date.toISOString().slice(0, 10)} />
@@ -76,6 +79,7 @@ export default async function EditPostPage({ params }: { params: { id: string } 
             保存
           </button>
           <form action={deleteAction}>
+            <input type="hidden" name="id" value={post.id} />
             <button
               type="submit"
               className="rounded-lg border border-red-300 text-red-600 px-4 py-2 hover:bg-red-50 dark:border-red-700 dark:hover:bg-red-900/40"
