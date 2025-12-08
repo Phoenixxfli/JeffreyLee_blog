@@ -50,8 +50,8 @@ const credentialsProvider = CredentialsProvider({
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
-  session: { strategy: "database" },
+  // Credentials Provider 使用 JWT session strategy，不需要 adapter
+  session: { strategy: "jwt" },
   trustHost: true,
   secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "dev-secret",
   pages: {
@@ -73,50 +73,50 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     },
-    async session({ session, user }) {
-      if (session.user && user) {
-        // 从数据库获取用户信息
+    async jwt({ token, user }) {
+      // 首次登录时，user 对象包含用户信息
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.image = user.image;
+        
+        // 从数据库获取用户信息以检查管理员状态
         try {
           const dbUser = await prisma.user.findUnique({
-            where: { id: typeof user === "string" ? user : user.id }
+            where: { id: user.id }
           });
           
           if (dbUser) {
-            session.user.id = dbUser.id;
-            if (dbUser.name || dbUser.username) {
-              session.user.name = dbUser.name ?? dbUser.username ?? null;
-            }
-            if (dbUser.email) {
-              session.user.email = dbUser.email;
-            }
-            if (dbUser.image) {
-              session.user.image = dbUser.image;
-            }
+            token.id = dbUser.id;
+            token.email = dbUser.email;
+            token.name = dbUser.name || dbUser.username;
+            token.image = dbUser.image;
             
-            // 检查是否为管理员：优先检查数据库中的 role，其次检查 ADMIN_EMAILS
+            // 检查是否为管理员
             if (dbUser.role === "admin") {
-              session.user.isAdmin = true;
+              token.isAdmin = true;
             } else if (dbUser.email) {
               const email = dbUser.email.toLowerCase();
-              session.user.isAdmin = adminEmails.includes(email);
-              // 如果邮箱在管理员列表中但数据库 role 不是 admin，更新数据库
-              if (adminEmails.includes(email) && dbUser.role !== "admin") {
-                try {
-                  await prisma.user.update({
-                    where: { id: dbUser.id },
-                    data: { role: "admin" }
-                  });
-                } catch (error) {
-                  console.error("更新用户角色失败:", error);
-                }
-              }
+              token.isAdmin = adminEmails.includes(email);
             } else {
-              session.user.isAdmin = false;
+              token.isAdmin = false;
             }
           }
         } catch (error) {
           console.error("获取用户信息失败:", error);
+          token.isAdmin = false;
         }
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user && token) {
+        session.user.id = token.id as string;
+        session.user.email = token.email as string | undefined;
+        session.user.name = token.name as string | undefined;
+        session.user.image = token.image as string | undefined;
+        session.user.isAdmin = token.isAdmin as boolean | undefined;
       }
       return session;
     }
