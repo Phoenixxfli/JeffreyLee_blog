@@ -60,15 +60,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [credentialsProvider],
   callbacks: {
     async signIn({ user }) {
-      // Credentials Provider 登录后，更新用户角色
+      // 登录时检查：只有数据库中已经是 admin 的用户才能保持管理员权限
+      // 或者，如果邮箱在 ADMIN_EMAILS 中且用户已存在，可以升级为管理员
+      // 但这是为了支持从旧系统迁移，新注册的用户不会自动成为管理员
       if (user.email && adminEmails.includes(user.email.toLowerCase())) {
         try {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { role: "admin" }
+          const dbUser = await prisma.user.findUnique({
+            where: { id: user.id }
           });
+          // 只有用户已存在且不是新注册的，才允许升级为管理员
+          // 新注册的用户需要手动在数据库中设置为 admin
+          if (dbUser && dbUser.role !== "admin") {
+            // 可选：如果确实需要自动升级，可以取消下面的注释
+            // await prisma.user.update({
+            //   where: { id: user.id },
+            //   data: { role: "admin" }
+            // });
+          }
         } catch (error) {
-          console.error("更新用户角色失败:", error);
+          console.error("检查用户角色失败:", error);
         }
       }
       return true;

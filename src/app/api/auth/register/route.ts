@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 创建用户
+    // 创建用户（注册时始终是普通用户，不自动赋予管理员权限）
     const hashedPassword = await hashPassword(password);
     const user = await prisma.user.create({
       data: {
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         email,
         password: hashedPassword,
         name: name || username,
-        role: "user"
+        role: "user" // 注册时始终是普通用户
       }
     });
 
