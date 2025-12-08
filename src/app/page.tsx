@@ -55,14 +55,14 @@ export default async function HomePage() {
               }
             >
               <div className="space-y-4">
-                {rest.map((post) => (
+                {rest.map((post: typeof posts[0]) => (
                   <PostCard
                     key={post.slug}
                     frontmatter={{
                       title: post.title,
                       slug: post.slug,
                       date: post.date.toISOString(),
-                      tags: post.tags ? post.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+                      tags: post.tags ? post.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [],
                       summary: post.summary,
                       cover: post.cover
                     }}
@@ -84,18 +84,18 @@ export default async function HomePage() {
 
             <SidebarCard title="搜索">
               <SearchBox
-                items={posts.map((p) => ({
+                items={posts.map((p: typeof posts[0]) => ({
                   title: p.title,
                   slug: p.slug,
                   summary: p.summary ?? undefined,
-                  tags: p.tags ? p.tags.split(",").map((t) => t.trim()).filter(Boolean) : []
+                  tags: p.tags ? p.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : []
                 }))}
               />
             </SidebarCard>
 
             <SidebarCard title="标签">
               <div className="flex flex-wrap gap-2">
-                {tags.slice(0, 20).map((t) => (
+                {tags.slice(0, 20).map((t: { tag: string; count: number }) => (
                   <Link
                     key={t.tag}
                     href={`/tags/${t.tag}`}
