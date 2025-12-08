@@ -5,6 +5,15 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolink from "rehype-autolink-headings";
 import rehypePrism from "rehype-prism-plus";
 
+export type PostFrontmatter = {
+  title: string;
+  slug: string;
+  date: string;
+  tags: string[];
+  summary?: string | null;
+  cover?: string | null;
+};
+
 export const getPostSlugs = async () =>
   (await prisma.post.findMany({ where: { status: "published" }, select: { slug: true } })).map(
     (p) => p.slug
