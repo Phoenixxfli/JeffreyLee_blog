@@ -1,0 +1,31 @@
+---
+title: "上传与插入多媒体：图片、音频、视频"
+slug: "media-guide"
+date: "2025-12-07"
+tags:
+  - 媒体
+  - 上传
+summary: "本地与生产环境如何管理多媒体资源，以及嵌入示例。"
+cover: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200"
+---
+
+博客支持在文章中插入多媒体。常见做法：
+
+### 本地开发
+- 使用 `/api/upload` 将文件落到 `public/uploads`。
+- 文章中直接引用 `/uploads/xxx.ext`。
+
+### 生产环境建议
+- 对接对象存储（S3、OSS、COS），上传后返回 CDN 链接。
+- 设置最大体积、文件类型白名单与鉴黄/防违规检测。
+
+下面是嵌入示例：
+
+```mdx
+![示例图片](/uploads/example.jpg)
+
+<audio controls src="/uploads/example.mp3" />
+
+<video controls width="100%" src="/uploads/example.mp4" />
+```
+

@@ -1,0 +1,14 @@
+.next
+node_modules
+dist
+.turbo
+.vercel
+*.log
+.DS_Store
+*.swp
+*.swo
+/.idea
+/.vscode
+coverage
+public/uploads
+
