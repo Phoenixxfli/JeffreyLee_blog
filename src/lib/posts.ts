@@ -12,6 +12,7 @@ export type PostFrontmatter = {
   tags: string[];
   summary?: string | null;
   cover?: string | null;
+  readingTime?: string;
 };
 
 export const getPostSlugs = async () =>
