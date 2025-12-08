@@ -22,7 +22,7 @@ export default async function TagDetailPage({ params }: Props) {
               summary: post.summary,
               cover: post.cover
             }}
-            excerpt={post.summary}
+            excerpt={post.summary ?? undefined}
           />
         ))}
         {!posts.length && <div className="text-sm text-gray-500">没有相关文章</div>}

@@ -18,7 +18,7 @@ export default async function ArchivePage() {
               summary: post.summary,
               cover: post.cover
             }}
-            excerpt={post.summary}
+            excerpt={post.summary ?? undefined}
           />
         ))}
       </div>

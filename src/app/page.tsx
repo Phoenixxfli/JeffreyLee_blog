@@ -33,7 +33,7 @@ export default async function HomePage() {
           <div className="space-y-6">
             {featured && (
               <ContentCard title="精选推荐">
-                <PostCard frontmatter={featured.frontmatter} excerpt={featured.frontmatter.summary || featured.excerpt} />
+                <PostCard frontmatter={featured.frontmatter} excerpt={featured.frontmatter.summary ?? featured.excerpt ?? undefined} />
               </ContentCard>
             )}
             <ContentCard
@@ -56,7 +56,7 @@ export default async function HomePage() {
                       summary: post.summary,
                       cover: post.cover
                     }}
-                    excerpt={post.summary}
+                    excerpt={post.summary ?? undefined}
                   />
                 ))}
                 {!rest.length && featured && <div className="text-sm text-gray-500">暂无更多文章，快去创作一篇吧。</div>}
