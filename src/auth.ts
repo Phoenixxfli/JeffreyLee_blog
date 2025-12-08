@@ -35,7 +35,7 @@ const credentialsProvider = CredentialsProvider({
     }
 
     // 验证密码
-    const isValid = await verifyPassword(credentials.password, user.password);
+    const isValid = await verifyPassword(credentials.password as string, user.password);
     if (!isValid) {
       return null;
     }
