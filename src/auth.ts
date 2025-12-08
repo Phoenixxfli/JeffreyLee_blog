@@ -42,9 +42,9 @@ const credentialsProvider = CredentialsProvider({
 
     return {
       id: user.id,
-      name: user.name || user.username,
-      email: user.email,
-      image: user.image
+      name: user.name || user.username || undefined,
+      email: user.email || undefined,
+      image: user.image || undefined
     };
   }
 });
