@@ -5,9 +5,13 @@ import { prisma } from "@/lib/prisma";
 import { Resend } from "resend";
 
 // 动态导入 nodemailer，避免 Edge runtime 问题
-let nodemailer: typeof import("nodemailer") | null = null;
+let nodemailer: any = null;
 if (typeof window === "undefined") {
-  nodemailer = require("nodemailer");
+  try {
+    nodemailer = require("nodemailer");
+  } catch {
+    // nodemailer 不可用
+  }
 }
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
