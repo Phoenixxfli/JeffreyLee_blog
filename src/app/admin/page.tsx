@@ -7,8 +7,8 @@ export default async function AdminPage() {
   const { isAdmin } = await requireAdmin();
   if (!isAdmin) redirect("/auth/signin");
 
-  const posts = getAllPosts();
-  const tags = getAllTags();
+  const posts = await getAllPosts();
+  const tags = await getAllTags();
 
   const storageMode = process.env.R2_BUCKET ? "Cloudflare R2" : "本地存储 (public/uploads)";
 
@@ -35,12 +35,12 @@ export default async function AdminPage() {
         <div className="grid gap-2">
           {posts.slice(0, 6).map((post) => (
             <Link
-              key={post.frontmatter.slug}
-              href={`/blog/${post.frontmatter.slug}`}
+              key={post.slug}
+              href={`/blog/${post.slug}`}
               className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-800 px-3 py-2 text-sm hover:border-brand"
             >
-              <span>{post.frontmatter.title}</span>
-              <span className="text-xs text-gray-500">{post.frontmatter.date}</span>
+              <span>{post.title}</span>
+              <span className="text-xs text-gray-500">{post.date.toLocaleDateString()}</span>
             </Link>
           ))}
           {!posts.length && <div className="text-sm text-gray-500">暂无文章</div>}
