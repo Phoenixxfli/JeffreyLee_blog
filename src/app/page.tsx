@@ -38,7 +38,7 @@ export default async function HomePage() {
                     title: featured.title,
                     slug: featured.slug,
                     date: featured.date.toISOString(),
-                    tags: featured.tags ? featured.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+                    tags: featured.tags ? featured.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [],
                     summary: featured.summary,
                     cover: featured.cover
                   }}

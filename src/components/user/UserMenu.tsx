@@ -10,8 +10,8 @@ export default function UserMenu() {
   useEffect(() => {
     const load = async () => {
       const mod = await import("next-auth/react");
-      const { data } = await mod.getSession();
-      setSession(data);
+      const session = await mod.getSession();
+      setSession(session);
     };
     load();
   }, []);
