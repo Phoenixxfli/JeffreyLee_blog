@@ -41,7 +41,7 @@ git add .
 git commit -m "Initial commit"
 
 # 连接到 GitHub（把 YOUR_USERNAME 和 my-blog 改成你的）
-git remote add origin https://github.com/YOUR_USERNAME/my-blog.git
+git remote add origin https://github.com/Phoenixxfli/JeffreyLee_blog
 
 # 推送代码
 git branch -M main
