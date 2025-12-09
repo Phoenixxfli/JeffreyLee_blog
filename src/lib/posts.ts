@@ -21,7 +21,21 @@ export const getPostSlugs = async () =>
   );
 
 export const getPostBySlug = async (slug: string) => {
-  const post = await prisma.post.findUnique({ where: { slug } });
+  const post = await prisma.post.findUnique({ 
+    where: { slug },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      date: true,
+      tags: true,
+      summary: true,
+      cover: true,
+      content: true,
+      status: true,
+      views: true
+    }
+  });
   if (!post || post.status !== "published") return null;
 
   // 检测内容是 HTML 还是 Markdown
