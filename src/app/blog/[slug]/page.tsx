@@ -16,21 +16,29 @@ export async function generateStaticParams() {
 export default async function PostPage({ params }: Props) {
   const result = await getPostBySlug(params.slug);
   if (!result) return null;
-  const { post, content } = result;
+  const { post, content, contentType } = result;
+  
+  const frontmatter = {
+    title: post.title,
+    slug: post.slug,
+    date: post.date.toISOString(),
+    tags: post.tags ? post.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+    summary: post.summary,
+    cover: post.cover
+  };
+
   return (
     <div className="grid gap-8 lg:grid-cols-[2fr,1fr]">
       <div className="space-y-8">
-        <MDXContent
-          frontmatter={{
-            title: post.title,
-            slug: post.slug,
-            date: post.date.toISOString(),
-            tags: post.tags ? post.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
-            summary: post.summary,
-            cover: post.cover
-          }}
-        >
-          {content}
+        <MDXContent frontmatter={frontmatter}>
+          {contentType === "html" ? (
+            <div 
+              className="prose prose-slate dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: content as string }}
+            />
+          ) : (
+            content
+          )}
         </MDXContent>
         <GiscusComments />
         <div className="flex gap-4 text-sm">

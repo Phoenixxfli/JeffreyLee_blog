@@ -24,27 +24,42 @@ export const getPostBySlug = async (slug: string) => {
   const post = await prisma.post.findUnique({ where: { slug, status: "published" } });
   if (!post) return null;
 
-  const { content: compiledContent } = await compileMDX({
-    source: post.content,
-    options: {
-      parseFrontmatter: false,
-      mdxOptions: {
-        remarkPlugins: [remarkGfm],
-        rehypePlugins: [
-          rehypeSlug,
-          [
-            rehypeAutolink,
-            {
-              behavior: "wrap"
-            }
-          ],
-          rehypePrism
-        ]
-      }
-    }
-  });
+  // 检测内容是 HTML 还是 Markdown
+  // HTML 内容通常以 < 开头，Markdown 通常以文本开头
+  const isHTML = post.content.trim().startsWith("<");
+  
+  if (isHTML) {
+    // 如果是 HTML，直接返回原始内容和类型标识
+    return { post, content: post.content, contentType: "html" as const };
+  }
 
-  return { post, content: compiledContent };
+  // 如果是 Markdown，使用 MDX 编译
+  try {
+    const { content: compiledContent } = await compileMDX({
+      source: post.content,
+      options: {
+        parseFrontmatter: false,
+        mdxOptions: {
+          remarkPlugins: [remarkGfm],
+          rehypePlugins: [
+            rehypeSlug,
+            [
+              rehypeAutolink,
+              {
+                behavior: "wrap"
+              }
+            ],
+            rehypePrism
+          ]
+        }
+      }
+    });
+    return { post, content: compiledContent, contentType: "mdx" as const };
+  } catch (error) {
+    console.error("MDX 编译错误:", error);
+    // 如果编译失败，回退到 HTML 渲染
+    return { post, content: post.content, contentType: "html" as const };
+  }
 };
 
 export const getAllPosts = async () => {
