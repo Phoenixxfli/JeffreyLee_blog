@@ -10,6 +10,7 @@ import { siteConfig } from "@/config/site";
 
 type Props = {
   params: { slug: string };
+  searchParams?: { preview?: string };
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

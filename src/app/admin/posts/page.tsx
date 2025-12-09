@@ -234,6 +234,22 @@ export default function AdminPostsPage() {
               </div>
               <div className="col-span-2 text-sm text-gray-500 truncate">{post.tags}</div>
               <div className="col-span-1 flex gap-2">
+                {post.status === "draft" && (
+                  <Link
+                    href={`/blog/${post.slug}?preview=true`}
+                    target="_blank"
+                    className="text-xs text-blue-600 hover:underline"
+                  >
+                    预览
+                  </Link>
+                )}
+                <a
+                  href={`/api/posts/${post.slug}/export?format=markdown`}
+                  download
+                  className="text-xs text-green-600 hover:underline"
+                >
+                  导出
+                </a>
                 <Link
                   href={`/admin/posts/${post.id}`}
                   className="text-xs text-brand hover:underline"
