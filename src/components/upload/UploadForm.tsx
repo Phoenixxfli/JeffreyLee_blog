@@ -64,7 +64,7 @@ export default function UploadForm() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.3fr,1fr]">
+      <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/70 p-4 lg:p-5 shadow-sm">
           <div className="flex flex-wrap gap-3 text-sm">
             <label className="rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/60 px-3 py-2 cursor-pointer">
