@@ -1,7 +1,7 @@
 import MDXContent from "@/components/content/MDXContent";
 import { getPostBySlug, getPostSlugs } from "@/lib/posts";
 import Link from "next/link";
-import GiscusComments from "@/components/comments/GiscusComments";
+import CommentSection from "@/components/comments/CommentSection";
 import TOC from "@/components/content/TOC";
 
 type Props = {
@@ -40,7 +40,7 @@ export default async function PostPage({ params }: Props) {
             content
           )}
         </MDXContent>
-        <GiscusComments />
+        <CommentSection postId={post.id} />
         <div className="flex gap-4 text-sm">
           <Link href="/">← 返回首页</Link>
           <Link href="/tags">查看全部标签</Link>
