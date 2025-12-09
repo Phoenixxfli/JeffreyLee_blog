@@ -22,28 +22,20 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查用户名和邮箱是否已存在
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { username },
-          { email }
-        ]
-      }
-    });
+    const existingByUsername = username ? await prisma.user.findUnique({ where: { username } }) : null;
+    const existingByEmail = email ? await prisma.user.findUnique({ where: { email } }) : null;
 
-    if (existingUser) {
-      if (existingUser.username === username) {
-        return NextResponse.json(
-          { error: "用户名已被使用" },
-          { status: 400 }
-        );
-      }
-      if (existingUser.email === email) {
-        return NextResponse.json(
-          { error: "邮箱已被注册" },
-          { status: 400 }
-        );
-      }
+    if (existingByUsername) {
+      return NextResponse.json(
+        { error: "用户名已被使用" },
+        { status: 400 }
+      );
+    }
+    if (existingByEmail) {
+      return NextResponse.json(
+        { error: "邮箱已被注册" },
+        { status: 400 }
+      );
     }
 
     // 创建用户（注册时始终是普通用户，不自动赋予管理员权限）
