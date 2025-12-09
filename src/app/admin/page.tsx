@@ -27,6 +27,9 @@ export default async function AdminPage() {
         <Card title="标签与归档" description="查看标签分布，便于内容规划" href="/tags" />
         <Card title="留言管理" description="查看/删除留言" href="/admin/messages" />
         <Card title="评论管理" description="审核、管理评论" href="/admin/comments" />
+        <Card title="标签管理" description="查看标签统计" href="/admin/tags" />
+        <Card title="媒体库" description="管理上传的媒体文件" href="/admin/media" />
+        <Card title="用户管理" description="查看所有注册用户" href="/admin/users" />
         <Card title="关于编辑" description="维护 About 页面" href="/admin/about" />
         <Card title="前台主页" description="查看最新文章列表与搜索体验" href="/" />
       </section>

@@ -33,7 +33,8 @@ export const getPostBySlug = async (slug: string) => {
       cover: true,
       content: true,
       status: true,
-      views: true
+      views: true,
+      updatedAt: true
     }
   });
   if (!post || post.status !== "published") return null;
