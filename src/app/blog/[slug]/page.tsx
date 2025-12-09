@@ -68,8 +68,8 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }));
 }
 
-export default async function PostPage({ params }: Props) {
-  const result = await getPostBySlug(params.slug);
+export default async function PostPage({ params, searchParams }: Props) {
+  const result = await getPostBySlug(params.slug, searchParams?.preview === "true");
   if (!result) return null;
   const { post, content, contentType } = result;
   
