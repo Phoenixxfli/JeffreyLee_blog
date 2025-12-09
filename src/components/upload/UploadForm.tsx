@@ -106,7 +106,10 @@ export default function UploadForm() {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={16}
-            placeholder="这里写正文，支持 Markdown 语法。可插入：\n- 图片：![alt](url)\n- 视频：<video controls src=\"url\"></video>\n- 音频：<audio controls src=\"url\"></audio>"
+            placeholder={`这里写正文，支持 Markdown 语法。可插入：
+- 图片：![alt](url)
+- 视频：<video controls src="url"></video>
+- 音频：<audio controls src="url"></audio>`}
             className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-3 py-3 text-sm font-mono leading-relaxed focus:border-brand focus:outline-none"
           />
         </div>
