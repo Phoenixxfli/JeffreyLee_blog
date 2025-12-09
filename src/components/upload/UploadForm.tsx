@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 type UploadStatus = "idle" | "uploading" | "success" | "error";
 type PreviewItem = { name: string; url: string; type: "image" | "video" | "audio" | "file" };
@@ -8,154 +10,139 @@ type PreviewItem = { name: string; url: string; type: "image" | "video" | "audio
 export default function UploadForm() {
   const [status, setStatus] = useState<UploadStatus>("idle");
   const [message, setMessage] = useState("");
+  const [content, setContent] = useState("");
   const [previews, setPreviews] = useState<PreviewItem[]>([]);
 
   const hasProgress = useMemo(() => status === "uploading", [status]);
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const files = Array.from(formData.getAll("files")).filter(Boolean) as File[];
-    const videoUrl = (formData.get("videoUrl") as string)?.trim();
-    const audioUrl = (formData.get("audioUrl") as string)?.trim();
+  const appendSnippet = (snippet: string) => {
+    setContent((prev) => (prev ? `${prev}\n\n${snippet}` : snippet));
+  };
 
-    if (!files.length && !videoUrl && !audioUrl) {
-      setMessage("请至少上传一个文件或填写视频/音频链接");
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) {
+      setMessage("请选择要上传的文件");
       return;
     }
-
     setStatus("uploading");
-    setMessage("");
-    setPreviews([]);
+    setMessage("上传中...");
     const nextPreviews: PreviewItem[] = [];
-
     try {
-      for (const file of files) {
+      for (const file of Array.from(files)) {
         const fd = new FormData();
         fd.append("file", file);
         const res = await fetch("/api/upload", { method: "POST", body: fd });
         if (!res.ok) throw new Error(await res.text());
         const json = await res.json();
-        nextPreviews.push({ name: file.name, url: json.url, type: detectType(file.name) });
+        const type = detectType(file.name);
+        nextPreviews.push({ name: file.name, url: json.url, type });
+        appendSnippet(buildSnippet(type, json.url, file.name));
       }
-
-      if (videoUrl) nextPreviews.push({ name: "视频链接", url: videoUrl, type: "video" });
-      if (audioUrl) nextPreviews.push({ name: "音频链接", url: audioUrl, type: "audio" });
-
-      setPreviews(nextPreviews);
+      setPreviews((prev) => [...nextPreviews, ...prev]);
       setStatus("success");
-      setMessage("已生成可引用链接");
-      e.currentTarget.reset();
+      setMessage("上传成功，已插入链接");
     } catch (err: any) {
       setStatus("error");
       setMessage(err.message ?? "上传失败");
     }
   };
 
+  const handleLinkInsert = (type: "video" | "audio" | "image") => {
+    const url = prompt(`请输入${type === "image" ? "图片" : type === "video" ? "视频" : "音频"}链接`);
+    if (!url) return;
+    appendSnippet(buildSnippet(type, url, type));
+    setPreviews((prev) => [{ name: `${type} link`, url, type }, ...prev]);
+    setMessage("已插入外链");
+  };
+
   return (
-    <div className="space-y-6 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/70 p-6 shadow-sm">
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold">组合上传</h2>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold">创作 / 素材上传</h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          支持图片 / 视频 / 音频 / 外链，生成可直接引用的链接。
+          类 Markdown 编辑，可随时插入图片 / 视频 / 音频（上传或外链），实时预览。
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-5">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">标题</label>
-            <input
-              name="title"
-              placeholder="用于区分本次上传的内容"
-              className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 text-sm focus:border-brand focus:outline-none"
-            />
+      <div className="grid gap-6 lg:grid-cols-[1.3fr,1fr]">
+        <div className="space-y-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/70 p-4 lg:p-5 shadow-sm">
+          <div className="flex flex-wrap gap-3 text-sm">
+            <label className="rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/60 px-3 py-2 cursor-pointer">
+              <input
+                type="file"
+                multiple
+                accept="image/*,video/*,audio/*"
+                className="hidden"
+                onChange={(e) => handleFiles(e.target.files)}
+              />
+              上传文件
+            </label>
+            <button
+              type="button"
+              className="rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-2 hover:border-brand"
+              onClick={() => handleLinkInsert("image")}
+            >
+              插入图片链接
+            </button>
+            <button
+              type="button"
+              className="rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-2 hover:border-brand"
+              onClick={() => handleLinkInsert("video")}
+            >
+              插入视频链接
+            </button>
+            <button
+              type="button"
+              className="rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-2 hover:border-brand"
+              onClick={() => handleLinkInsert("audio")}
+            >
+              插入音频链接
+            </button>
+            {status === "uploading" && <span className="text-xs text-gray-500">上传中…</span>}
+            {message && status !== "uploading" && <span className="text-xs text-gray-600 dark:text-gray-300">{message}</span>}
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">标签（逗号分隔）</label>
-            <input
-              name="tags"
-              placeholder="image, video, cover"
-              className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 text-sm focus:border-brand focus:outline-none"
-            />
-          </div>
-        </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">描述</label>
           <textarea
-            name="description"
-            rows={3}
-            placeholder="本次素材的用途/备注"
-            className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 text-sm focus:border-brand focus:outline-none"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={16}
+            placeholder="这里写正文，支持 Markdown 语法。可插入：\n- 图片：![alt](url)\n- 视频：<video controls src=\"url\"></video>\n- 音频：<audio controls src=\"url\"></audio>"
+            className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 px-3 py-3 text-sm font-mono leading-relaxed focus:border-brand focus:outline-none"
           />
         </div>
 
-        <div className="space-y-3">
-          <label className="text-sm font-medium">上传文件（可多选）</label>
-          <div className="rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-900/50 p-4 text-sm">
-            <input
-              type="file"
-              name="files"
-              multiple
-              accept="image/*,video/*,audio/*"
-              className="w-full text-sm"
-            />
-            <p className="mt-2 text-xs text-gray-500">支持图片 / 视频 / 音频，多个文件可同时上传</p>
+        <div className="space-y-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/70 p-4 lg:p-5 shadow-sm">
+          <div className="text-sm font-semibold">实时预览</div>
+          <div className="prose prose-slate dark:prose-invert max-w-none">
+            {content ? (
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+            ) : (
+              <div className="text-sm text-gray-500">输入正文后，这里会实时显示效果。</div>
+            )}
           </div>
-        </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">视频外链（可选）</label>
-            <input
-              name="videoUrl"
-              placeholder="如 B 站、YouTube 外链，或已上传的视频地址"
-              className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 text-sm focus:border-brand focus:outline-none"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">音频外链（可选）</label>
-            <input
-              name="audioUrl"
-              placeholder="如音乐/播客外链，或已上传的音频地址"
-              className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 text-sm focus:border-brand focus:outline-none"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            type="submit"
-            disabled={hasProgress}
-            className="rounded-lg bg-brand px-4 py-2 text-white hover:bg-brand/90 disabled:opacity-60"
-          >
-            {status === "uploading" ? "上传中..." : "生成可引用链接"}
-          </button>
-          {message && <span className="text-sm text-gray-700 dark:text-gray-300">{message}</span>}
-        </div>
-      </form>
-
-      {previews.length > 0 && (
-        <div className="space-y-3">
-          <div className="text-sm font-semibold">结果预览</div>
-          <div className="grid gap-3 md:grid-cols-2">
-            {previews.map((p) => (
-              <div
-                key={p.url + p.name}
-                className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-3 space-y-2 text-sm"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-medium truncate">{p.name}</span>
-                  <CopyButton text={p.url} />
-                </div>
-                <div className="text-xs break-all text-gray-600 dark:text-gray-400">{p.url}</div>
-                <PreviewContent item={p} />
+          {previews.length > 0 && (
+            <div className="space-y-2">
+              <div className="text-sm font-semibold">素材列表</div>
+              <div className="grid gap-3 md:grid-cols-2">
+                {previews.map((p) => (
+                  <div
+                    key={p.url + p.name}
+                    className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-3 space-y-2 text-sm"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-medium truncate">{p.name}</span>
+                      <CopyButton text={p.url} />
+                    </div>
+                    <div className="text-xs break-all text-gray-600 dark:text-gray-400">{p.url}</div>
+                    <PreviewContent item={p} />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -168,11 +155,18 @@ function detectType(filename: string): PreviewItem["type"] {
   return "file";
 }
 
+function buildSnippet(type: PreviewItem["type"], url: string, name: string) {
+  if (type === "image") return `![${name}](${url})`;
+  if (type === "video") return `<video controls src="${url}"></video>`;
+  if (type === "audio") return `<audio controls src="${url}"></audio>`;
+  return `[${name}](${url})`;
+}
+
 function PreviewContent({ item }: { item: PreviewItem }) {
   if (item.type === "video") return <video src={item.url} controls className="max-h-56 w-full rounded-lg bg-black/5" />;
   if (item.type === "audio") return <audio src={item.url} controls className="w-full" />;
   if (item.type === "image") return <img src={item.url} alt={item.name} className="max-h-56 rounded-lg" />;
-  return <div className="text-xs text-gray-500">可在文章或页面中直接引用此链接。</div>;
+  return <div className="text-xs text-gray-500">可在正文中直接引用此链接。</div>;
 }
 
 function CopyButton({ text }: { text: string }) {
