@@ -26,6 +26,7 @@ export default async function AdminPage() {
         <Card title="文章管理" description="创建/编辑/删除文章" href="/admin/posts" />
         <Card title="标签与归档" description="查看标签分布，便于内容规划" href="/tags" />
         <Card title="留言管理" description="查看/删除留言" href="/admin/messages" />
+        <Card title="评论管理" description="审核、管理评论" href="/admin/comments" />
         <Card title="关于编辑" description="维护 About 页面" href="/admin/about" />
         <Card title="前台主页" description="查看最新文章列表与搜索体验" href="/" />
       </section>

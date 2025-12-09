@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/authz";
 import { getPostFullById, updatePost, deletePost } from "@/lib/posts-db";
 import { revalidatePath } from "next/cache";
 import CoverField from "@/components/admin/CoverField";
-import ContentWithPreview from "@/components/admin/ContentWithPreview";
+import WysiwygEditor from "@/components/admin/WysiwygEditor";
 
 export default async function EditPostPage({ params }: { params: { id: string } }) {
   const { isAdmin } = await requireAdmin();
@@ -62,7 +62,10 @@ export default async function EditPostPage({ params }: { params: { id: string } 
         <TextInput name="tags" label="标签（逗号分隔）" placeholder="tag1, tag2" defaultValue={post.tags} />
         <CoverField label="封面 URL" defaultValue={post.cover || ""} />
         <TextInput name="summary" label="摘要" placeholder="一句话摘要" defaultValue={post.summary || ""} />
-        <ContentWithPreview defaultValue={post.content} />
+        <div className="space-y-2">
+          <label className="text-sm font-semibold">内容</label>
+          <WysiwygEditor defaultValue={post.content} />
+        </div>
         <div className="space-y-2">
           <label className="text-sm font-semibold">状态</label>
           <select
