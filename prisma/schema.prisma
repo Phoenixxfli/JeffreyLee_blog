@@ -19,6 +19,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   messages      Message[]
+  comments      Comment[]
 
   @@index([username])
 }
@@ -75,16 +76,38 @@ model Page {
 }
 
 model Post {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
-  slug        String   @unique
+  slug        String    @unique
   date        DateTime
-  tags        String   @default("") // comma-separated
+  tags        String    @default("") // comma-separated
   summary     String?
   cover       String?
-  content     String   // markdown/mdx content
-  status      String   @default("published") // published | draft
-  updatedAt   DateTime @updatedAt
-  createdAt   DateTime @default(now())
+  content     String    // markdown/mdx content
+  status      String    @default("published") // published | draft
+  views       Int       @default(0) // 阅读量
+  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime  @default(now())
+  comments    Comment[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  parentId  String?  // 回复的评论 ID
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+  name      String?  // 访客名称（未登录用户）
+  email     String?  // 访客邮箱（未登录用户）
+  content   String
+  status    String   @default("approved") // approved | pending | spam
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@index([parentId])
 }
 
