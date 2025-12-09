@@ -21,8 +21,8 @@ export const getPostSlugs = async () =>
   );
 
 export const getPostBySlug = async (slug: string) => {
-  const post = await prisma.post.findUnique({ where: { slug, status: "published" } });
-  if (!post) return null;
+  const post = await prisma.post.findUnique({ where: { slug } });
+  if (!post || post.status !== "published") return null;
 
   // 检测内容是 HTML 还是 Markdown
   // HTML 内容通常以 < 开头，Markdown 通常以文本开头
