@@ -75,13 +75,6 @@ export default async function HomePage() {
           </div>
 
           <div className="space-y-6">
-            <SidebarCard title="关于">
-              <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                这里记录创作、技术与思考。支持多媒体内容与评论，管理员登录后可上传媒体、维护站点。
-              </p>
-              <div className="mt-2 text-xs text-gray-500">邮箱登录可进入后台。</div>
-            </SidebarCard>
-
             <SidebarCard title="搜索">
               <SearchBox
                 items={posts.map((p: typeof posts[0]) => ({
@@ -108,14 +101,6 @@ export default async function HomePage() {
               </div>
             </SidebarCard>
 
-            <SidebarCard title="功能速览">
-              <ul className="list-disc pl-4 space-y-1 text-sm text-gray-700 dark:text-gray-300">
-                <li>Markdown / MDX 写作，代码高亮</li>
-                <li>图片 / 音频 / 视频 上传与引用</li>
-                <li>邮箱魔法链接登录，后台受保护</li>
-                <li>giscus 评论，RSS / sitemap / robots</li>
-              </ul>
-            </SidebarCard>
           </div>
         </div>
       </Section>
