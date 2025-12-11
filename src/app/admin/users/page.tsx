@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 
 export default async function AdminUsersPage() {
   const { isAdmin } = await requireAdmin();
@@ -13,6 +14,7 @@ export default async function AdminUsersPage() {
       name: true,
       email: true,
       role: true,
+      banned: true,
       _count: {
         select: {
           comments: true,
@@ -37,6 +39,7 @@ export default async function AdminUsersPage() {
           <div className="col-span-3">邮箱</div>
           <div className="col-span-2">角色</div>
           <div className="col-span-2">评论数</div>
+          <div className="col-span-2">操作</div>
         </div>
 
         {users.map((user) => (
@@ -64,6 +67,9 @@ export default async function AdminUsersPage() {
             <div className="col-span-2 text-sm text-gray-600 dark:text-gray-400">
               {user._count.comments} 条
             </div>
+            <div className="col-span-2 text-sm text-gray-600 dark:text-gray-400">
+              <BanToggle userId={user.id} banned={user.banned} />
+            </div>
           </div>
         ))}
 
@@ -72,6 +78,39 @@ export default async function AdminUsersPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function BanToggle({ userId, banned }: { userId: string; banned: boolean }) {
+  async function toggle(formData: FormData) {
+    "use server";
+    const next = formData.get("next") === "true";
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/admin/users/${userId}/ban`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ banned: next })
+    });
+  }
+
+  return (
+    <form action={toggle} className="flex items-center gap-2">
+      <input type="hidden" name="next" value={!banned ? "true" : "false"} />
+      <span
+        className={`text-xs px-2 py-1 rounded ${
+          banned
+            ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+            : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+        }`}
+      >
+        {banned ? "已禁用" : "正常"}
+      </span>
+      <button
+        type="submit"
+        className="text-xs text-blue-600 hover:underline"
+      >
+        {banned ? "解除禁用" : "禁用用户"}
+      </button>
+    </form>
   );
 }
 

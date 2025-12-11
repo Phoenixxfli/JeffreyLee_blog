@@ -60,7 +60,7 @@ export async function createComment(data: {
       name: data.name,
       email: data.email,
       content: data.content,
-      status: data.status || "pending" // 默认需要审核
+      status: data.status || "approved" // 默认直接发布，可由管理员删除/标记垃圾
     },
     include: {
       user: {
