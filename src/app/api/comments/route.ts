@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       postId,
       userId: session?.user?.id,
       parentId: parentId || undefined,
-      name: session?.user?.name || session?.user?.username || name,
+      name: session?.user?.name || name,
       email: session?.user?.email || email,
       content,
       status: session?.user?.isAdmin ? "approved" : "pending" // 管理员评论自动通过

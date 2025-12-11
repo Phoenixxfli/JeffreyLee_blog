@@ -99,7 +99,7 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel }: P
       )}
 
       <div className="text-xs text-gray-500">
-        以 <span className="font-semibold">{session.user.name || session.user.username || "用户"}</span> 身份评论
+        以 <span className="font-semibold">{session.user.name || "用户"}</span> 身份评论
       </div>
 
       <textarea
