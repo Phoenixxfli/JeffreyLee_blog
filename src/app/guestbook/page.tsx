@@ -21,7 +21,7 @@ export default async function GuestbookPage() {
       {session?.user ? (
         <form action={addMessage} className="space-y-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            以 <span className="font-semibold">{session.user.name || session.user.username || "用户"}</span> 身份留言
+            以 <span className="font-semibold">{session.user.name || "用户"}</span> 身份留言
           </div>
           <textarea
             name="content"
