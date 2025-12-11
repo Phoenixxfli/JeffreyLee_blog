@@ -26,6 +26,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "请先登录后再评论" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { postId, parentId, content, name, email } = body;
 
@@ -33,16 +37,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "postId 和 content 不能为空" }, { status: 400 });
     }
 
-    // 如果未登录，需要提供 name
-    if (!session?.user && !name) {
-      return NextResponse.json({ error: "未登录用户需要提供名称" }, { status: 400 });
-    }
-
     const comment = await createComment({
       postId,
       userId: session?.user?.id,
       parentId: parentId || undefined,
-      name: session?.user?.name || name,
+      name: session?.user?.name || session?.user?.username || name,
       email: session?.user?.email || email,
       content,
       status: session?.user?.isAdmin ? "approved" : "pending" // 管理员评论自动通过

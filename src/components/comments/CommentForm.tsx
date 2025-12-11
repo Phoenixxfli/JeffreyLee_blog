@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 type Props = {
   postId: string;
@@ -11,23 +12,21 @@ type Props = {
 };
 
 export default function CommentForm({ postId, parentId, onSuccess, onCancel }: Props) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [content, setContent] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!content.trim()) {
-      setMessage("请输入评论内容");
+    if (!session?.user) {
+      setMessage("请先登录后再评论");
       return;
     }
 
-    if (!session && !name.trim()) {
-      setMessage("请输入您的名称");
+    if (!content.trim()) {
+      setMessage("请输入评论内容");
       return;
     }
 
@@ -41,9 +40,7 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel }: P
         body: JSON.stringify({
           postId,
           parentId: parentId || undefined,
-          content: content.trim(),
-          name: session?.user?.name || name.trim(),
-          email: session?.user?.email || email.trim()
+          content: content.trim()
         })
       });
 
@@ -68,6 +65,22 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel }: P
     }
   };
 
+  // 未登录：提示登录
+  if (status === "loading") {
+    return <div className="text-sm text-gray-500">加载中...</div>;
+  }
+
+  if (!session?.user) {
+    return (
+      <div className="rounded-lg border border-dashed border-gray-200 dark:border-gray-700 p-4 text-sm text-gray-600 dark:text-gray-400">
+        请先登录后再评论。
+        <Link href="/auth/signin" className="ml-2 text-brand hover:underline">
+          去登录
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
       {parentId && (
@@ -84,29 +97,13 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel }: P
           )}
         </div>
       )}
-      
-      {!session && (
-        <div className="grid grid-cols-2 gap-3">
-          <input
-            type="text"
-            placeholder="您的名称 *"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 text-sm focus:border-brand focus:outline-none"
-            required
-          />
-          <input
-            type="email"
-            placeholder="您的邮箱（可选）"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 text-sm focus:border-brand focus:outline-none"
-          />
-        </div>
-      )}
+
+      <div className="text-xs text-gray-500">
+        以 <span className="font-semibold">{session.user.name || session.user.username || "用户"}</span> 身份评论
+      </div>
 
       <textarea
-        placeholder={session ? "写下您的评论..." : "写下您的评论...（评论需要审核）"}
+        placeholder="写下您的评论..."
         value={content}
         onChange={(e) => setContent(e.target.value)}
         rows={4}

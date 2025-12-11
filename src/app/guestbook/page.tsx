@@ -1,8 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { addMessage } from "./actions";
 import SubmitButton from "./SubmitButton";
+import { auth } from "@/auth";
+import Link from "next/link";
 
 export default async function GuestbookPage() {
+  const session = await auth();
   const messages = await prisma.message.findMany({
     orderBy: { createdAt: "desc" },
     take: 50
@@ -15,24 +18,28 @@ export default async function GuestbookPage() {
         <p className="text-sm text-gray-600 dark:text-gray-400">分享想法、反馈或打个招呼。最多 500 字。</p>
       </div>
 
-      <form action={addMessage} className="space-y-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
-        <div className="flex gap-4 max-sm:flex-col">
-          <input
-            name="name"
-            placeholder="称呼（可选）"
-            maxLength={80}
-            className="flex-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm focus:border-brand focus:outline-none"
+      {session?.user ? (
+        <form action={addMessage} className="space-y-4 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            以 <span className="font-semibold">{session.user.name || session.user.username || "用户"}</span> 身份留言
+          </div>
+          <textarea
+            name="content"
+            required
+            maxLength={500}
+            placeholder="想说点什么..."
+            className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm focus:border-brand focus:outline-none h-28"
           />
+          <SubmitButton />
+        </form>
+      ) : (
+        <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 p-4 text-sm text-gray-600 dark:text-gray-400">
+          请先登录后再留言。
+          <Link href="/auth/signin" className="ml-2 text-brand hover:underline">
+            去登录
+          </Link>
         </div>
-        <textarea
-          name="content"
-          required
-          maxLength={500}
-          placeholder="想说点什么..."
-          className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm focus:border-brand focus:outline-none h-28"
-        />
-        <SubmitButton />
-      </form>
+      )}
 
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">最近留言</h2>
