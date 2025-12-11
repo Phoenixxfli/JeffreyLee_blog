@@ -19,9 +19,6 @@ export default async function AdminUsersPage() {
           messages: true
         }
       }
-    },
-    orderBy: {
-      createdAt: "desc"
     }
   });
 
