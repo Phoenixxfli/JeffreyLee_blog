@@ -51,8 +51,6 @@ export default function CommentForm({ postId, parentId, onSuccess, onCancel }: P
       }
 
       setContent("");
-      setName("");
-      setEmail("");
       setMessage(data.message || "评论已提交");
       setTimeout(() => {
         onSuccess();
