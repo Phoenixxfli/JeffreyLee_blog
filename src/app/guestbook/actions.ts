@@ -15,7 +15,6 @@ export async function addMessage(formData: FormData) {
 
   const name =
     session.user.name ||
-    session.user.username ||
     (formData.get("name") as string | null)?.slice(0, 80) ||
     "用户";
 
