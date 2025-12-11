@@ -12,7 +12,6 @@ type MediaFile = {
 };
 
 export default function AdminMediaPage() {
-  const router = useRouter();
   const [files, setFiles] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "image" | "video" | "audio">("all");
