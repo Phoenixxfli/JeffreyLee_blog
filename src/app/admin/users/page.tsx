@@ -13,7 +13,6 @@ export default async function AdminUsersPage() {
       name: true,
       email: true,
       role: true,
-      createdAt: true,
       _count: {
         select: {
           comments: true,
@@ -41,7 +40,6 @@ export default async function AdminUsersPage() {
           <div className="col-span-3">邮箱</div>
           <div className="col-span-2">角色</div>
           <div className="col-span-2">评论数</div>
-          <div className="col-span-2">注册时间</div>
         </div>
 
         {users.map((user) => (
@@ -68,9 +66,6 @@ export default async function AdminUsersPage() {
             </div>
             <div className="col-span-2 text-sm text-gray-600 dark:text-gray-400">
               {user._count.comments} 条
-            </div>
-            <div className="col-span-2 text-sm text-gray-600 dark:text-gray-400">
-              {user.createdAt.toLocaleDateString("zh-CN")}
             </div>
           </div>
         ))}
